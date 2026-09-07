@@ -6,10 +6,14 @@ import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.tuusuario.cyberbattery.data.model.BatteryState
+import com.tuusuario.cyberbattery.data.reader.BatteryReader
 import com.tuusuario.cyberbattery.data.receiver.BatteryReceiver
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class BatteryViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,19 +23,37 @@ class BatteryViewModel(application: Application) : AndroidViewModel(application)
 
     private var batteryReceiver: BatteryReceiver? = null
     private var isRegistered = false
+    private var pollJob: Job? = null
 
     init {
+        publish(BatteryReader.read(application))
         registerReceiver()
+        startPolling()
+    }
+
+    private fun publish(state: BatteryState) {
+        _batteryState.value = state
+    }
+
+    /**
+     * La corriente instantánea NO llega en el broadcast.
+     * Hay que preguntar a BatteryManager varias veces por segundo.
+     */
+    private fun startPolling() {
+        if (pollJob != null) return
+        val context = getApplication<Application>().applicationContext
+        pollJob = viewModelScope.launch {
+            while (isActive) {
+                publish(BatteryReader.read(context))
+                delay(500L)
+            }
+        }
     }
 
     private fun registerReceiver() {
         if (isRegistered) return
         val context = getApplication<Application>().applicationContext
-        batteryReceiver = BatteryReceiver { state ->
-            viewModelScope.launch {
-                _batteryState.value = state
-            }
-        }
+        batteryReceiver = BatteryReceiver { state -> publish(state) }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.registerReceiver(
                 batteryReceiver,
@@ -39,6 +61,7 @@ class BatteryViewModel(application: Application) : AndroidViewModel(application)
                 Context.RECEIVER_NOT_EXPORTED
             )
         } else {
+            @Suppress("DEPRECATION")
             context.registerReceiver(
                 batteryReceiver,
                 BatteryReceiver.createIntentFilter()
@@ -59,7 +82,9 @@ class BatteryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     override fun onCleared() {
-        super.onCleared()
+        pollJob?.cancel()
+        pollJob = null
         unregisterReceiver()
+        super.onCleared()
     }
 }

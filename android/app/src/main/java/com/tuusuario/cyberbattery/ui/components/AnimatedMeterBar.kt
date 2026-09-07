@@ -21,16 +21,24 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tuusuario.cyberbattery.ui.theme.DarkCard
 import com.tuusuario.cyberbattery.ui.theme.MetallicBorder
+import com.tuusuario.cyberbattery.ui.theme.NeonCyan
 import com.tuusuario.cyberbattery.ui.theme.NeonRed
+import com.tuusuario.cyberbattery.ui.theme.TextPrimary
 import com.tuusuario.cyberbattery.ui.theme.TextSecondary
 
+/**
+ * Barra de medición animada estilo cyberpunk/neón.
+ * Usa Canvas + animateFloatAsState para un llenado fluido.
+ */
 @Composable
 fun AnimatedMeterBar(
     value: Float,
@@ -39,20 +47,24 @@ fun AnimatedMeterBar(
     unit: String,
     baseColor: Color,
     isCritical: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textValue: Float? = null
 ) {
     val safeMax = if (maxValue <= 0f) 1f else maxValue
     val targetProgress = (value / safeMax).coerceIn(0f, 1f)
+
     val animatedProgress by animateFloatAsState(
         targetValue = targetProgress,
         animationSpec = tween(durationMillis = 600),
         label = "meterProgress"
     )
+
     val barColor = if (isCritical) NeonRed else baseColor
-    val displayValue = if (unit == "mA" || unit == "%") {
-        value.toInt().toString()
-    } else {
-        String.format("%.2f", value)
+    val shown = textValue ?: value
+    val displayValue = when (unit) {
+        "mA", "%" -> shown.toInt().toString()
+        "V" -> String.format("%.3f", shown)
+        else -> String.format("%.2f", shown)
     }
 
     Column(
@@ -60,6 +72,7 @@ fun AnimatedMeterBar(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
+        // Etiqueta + valor
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -91,7 +104,10 @@ fun AnimatedMeterBar(
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Barra Canvas
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
@@ -99,24 +115,40 @@ fun AnimatedMeterBar(
         ) {
             val cornerRadius = CornerRadius(9.dp.toPx(), 9.dp.toPx())
             val strokeWidth = 2.dp.toPx()
-            drawRoundRect(color = DarkCard, size = size, cornerRadius = cornerRadius)
+
+            // Fondo oscuro
+            drawRoundRect(
+                color = DarkCard,
+                size = size,
+                cornerRadius = cornerRadius
+            )
+
+            // Borde metálico
             drawRoundRect(
                 color = MetallicBorder,
                 size = size,
                 cornerRadius = cornerRadius,
                 style = Stroke(width = strokeWidth)
             )
+
+            // Barra de llenado neón con gradiente sutil
             if (animatedProgress > 0.01f) {
                 val fillWidth = (size.width - strokeWidth * 2) * animatedProgress
                 val fillHeight = size.height - strokeWidth * 2
+
                 drawRoundRect(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(barColor.copy(alpha = 0.7f), barColor)
+                        colors = listOf(
+                            barColor.copy(alpha = 0.7f),
+                            barColor
+                        )
                     ),
                     topLeft = Offset(strokeWidth, strokeWidth),
                     size = Size(fillWidth, fillHeight),
                     cornerRadius = CornerRadius(7.dp.toPx(), 7.dp.toPx())
                 )
+
+                // Brillo superior (efecto neón)
                 drawRoundRect(
                     color = Color.White.copy(alpha = 0.25f),
                     topLeft = Offset(strokeWidth, strokeWidth),
@@ -125,5 +157,28 @@ fun AnimatedMeterBar(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0A0F)
+@Composable
+private fun AnimatedMeterBarPreview() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        AnimatedMeterBar(
+            value = 72f,
+            maxValue = 100f,
+            label = "Nivel de Batería",
+            unit = "%",
+            baseColor = NeonCyan,
+            isCritical = false
+        )
+        AnimatedMeterBar(
+            value = 12f,
+            maxValue = 100f,
+            label = "Nivel Crítico",
+            unit = "%",
+            baseColor = NeonCyan,
+            isCritical = true
+        )
     }
 }

@@ -23,6 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,31 +48,47 @@ import com.tuusuario.cyberbattery.viewmodel.BatteryViewModel
 import kotlin.math.abs
 
 @Composable
-fun DashboardScreen(viewModel: BatteryViewModel) {
+fun DashboardScreen(
+    viewModel: BatteryViewModel
+) {
     val state by viewModel.batteryState.collectAsStateWithLifecycle()
+
     DashboardContent(state = state)
 }
 
 @Composable
-fun DashboardContent(state: BatteryState) {
+fun DashboardContent(
+    state: BatteryState
+) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(DarkBackground)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
+        // Header
         HeaderSection(isCharging = state.isCharging)
+
         Spacer(modifier = Modifier.height(24.dp))
+
+        // Card principal con todas las métricas
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(DarkCard)
-                .border(1.dp, MetallicBorder, RoundedCornerShape(16.dp))
+                .border(
+                    width = 1.dp,
+                    color = MetallicBorder,
+                    shape = RoundedCornerShape(16.dp)
+                )
                 .padding(20.dp)
         ) {
             Column {
+                // Nivel de batería
                 AnimatedMeterBar(
                     value = state.level.toFloat(),
                     maxValue = 100f,
@@ -83,32 +101,49 @@ fun DashboardContent(state: BatteryState) {
                     },
                     isCritical = state.level < 15
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
+
+                // Voltaje (típico 3.0 - 4.4 V)
                 AnimatedMeterBar(
-                    value = state.voltage,
-                    maxValue = 4.5f,
+                    value = state.voltage.coerceAtLeast(0f),
+                    maxValue = 5.0f,
                     label = "Voltaje",
                     unit = "V",
                     baseColor = NeonGreen,
-                    isCritical = state.voltage < 3.3f
+                    isCritical = state.voltage > 0f && state.voltage < 3.3f
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
+
+                // Amperaje (mostramos valor absoluto para la barra)
+                val absCurrent = abs(state.current).toFloat()
+                val chargingNow = state.isCharging || state.current > 0
                 AnimatedMeterBar(
-                    value = abs(state.current).toFloat(),
-                    maxValue = 5000f,
-                    label = if (state.isCharging) "Corriente de Carga" else "Corriente de Descarga",
+                    value = absCurrent,
+                    maxValue = 6000f,
+                    label = if (chargingNow) "Corriente de Carga" else "Corriente de Descarga",
                     unit = "mA",
-                    baseColor = if (state.isCharging) NeonPink else NeonPurple
+                    baseColor = if (chargingNow) NeonPink else NeonPurple,
+                    isCritical = false,
+                    textValue = state.current.toFloat()
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
+
+                // Potencia
                 AnimatedMeterBar(
                     value = state.watts,
-                    maxValue = 25f,
-                    label = "Potencia",
+                    maxValue = 40f,
+                    label = if (state.isCharging) "Potencia de Carga" else "Potencia de Descarga",
                     unit = "W",
-                    baseColor = NeonYellow
+                    baseColor = NeonYellow,
+                    isCritical = false
                 )
+
                 Spacer(modifier = Modifier.height(12.dp))
+
+                // Temperatura
                 AnimatedMeterBar(
                     value = state.temperature,
                     maxValue = 50f,
@@ -123,30 +158,11 @@ fun DashboardContent(state: BatteryState) {
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(24.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(DarkCard.copy(alpha = 0.6f))
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "DATOS EN VIVO",
-                color = TextSecondary,
-                fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace,
-                letterSpacing = 1.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "V: ${String.format("%.3f", state.voltage)} V  ·  I: ${state.current} mA  ·  P: ${String.format("%.2f", state.watts)} W\nT: ${String.format("%.1f", state.temperature)} °C  ·  Nivel: ${state.level}%",
-                color = TextPrimary.copy(alpha = 0.8f),
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace,
-                lineHeight = 18.sp
-            )
-        }
+
+        // Footer informativo
+        FooterSection(state = state)
     }
 }
 
@@ -173,6 +189,8 @@ private fun HeaderSection(isCharging: Boolean) {
                 fontFamily = FontFamily.Monospace
             )
         }
+
+        // Indicador de estado de carga
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -182,9 +200,9 @@ private fun HeaderSection(isCharging: Boolean) {
                     else NeonRed.copy(alpha = 0.15f)
                 )
                 .border(
-                    1.dp,
-                    if (isCharging) NeonGreen.copy(alpha = 0.5f) else NeonRed.copy(alpha = 0.5f),
-                    RoundedCornerShape(20.dp)
+                    width = 1.dp,
+                    color = if (isCharging) NeonGreen.copy(alpha = 0.5f) else NeonRed.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(20.dp)
                 )
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
@@ -204,5 +222,38 @@ private fun HeaderSection(isCharging: Boolean) {
                 letterSpacing = 1.sp
             )
         }
+    }
+}
+
+@Composable
+private fun FooterSection(state: BatteryState) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(DarkCard.copy(alpha = 0.6f))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "DATOS EN VIVO",
+            color = TextSecondary,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.Monospace,
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = buildString {
+                append("V: ${String.format("%.3f", state.voltage)} V  ·  ")
+                append("I: ${state.current} mA  ·  ")
+                append("P: ${String.format("%.2f", state.watts)} W\n")
+                append("T: ${String.format("%.1f", state.temperature)} °C  ·  ")
+                append("Nivel: ${state.level}%")
+            },
+            color = TextPrimary.copy(alpha = 0.8f),
+            fontSize = 12.sp,
+            fontFamily = FontFamily.Monospace,
+            lineHeight = 18.sp
+        )
     }
 }
