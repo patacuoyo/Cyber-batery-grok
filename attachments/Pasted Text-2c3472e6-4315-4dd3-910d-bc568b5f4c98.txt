@@ -1,0 +1,179 @@
+Aquí tienes la versión reestructurada en formato Manual y Temario de Curso Monetizable.
+Está escrita directamente para tus alumnos o clientes (personas sin experiencia previa en
+programación) para que puedan seguir la formación paso a paso, usar Inteligencia Artificial
+(ChatGPT, Claude, Gemini, DeepSeek, etc.) como su "programador personal", consultar
+repositorios gratuitos y construir la aplicación desde cero sin gastar nada.
+Manual Práctico: Crea tu propia App
+Futurista de Control de Batería con IA
+(Sin Saber Programar)
+Bienvenida al Curso
+¡Te damos la bienvenida a esta formación práctica! En este manual aprenderás a crear desde
+cero una aplicación móvil funcional para Android centrada en la monitorización avanzada de
+batería en tiempo real (voltaje, amperaje, potencia en vatios, temperatura y nivel de carga)
+con una estética visual moderna de tipo cyberpunk o neón.
+No necesitas conocimientos previos de programación. Tu función principal será actuar como el
+Arquitecto y Diseñador del proyecto, mientras que las herramientas de Inteligencia Artificial
+(IA) se encargarán de escribir el código de forma gratuita.
+MÓDULO 1: Fundamentos y Herramientas Gratuitas
+1.1. Tu Arquitectura Tecnológica
+Para que tu aplicación funcione rápido, consuma la mínima batería posible y no requiera
+servidores ni pagos, utilizaremos el estándar nativo de Android:
+● Lenguaje: Kotlin (el lenguaje oficial recomendado por Google).
+● Interfaz Visual: Jetpack Compose con gráficos vectoriales en Canvas (permite dibujar
+barras neón sin sobrecargar el procesador).
+● Lectura de Hardware: BroadcastReceiver + BatteryManager (el sistema operativo
+notifica a tu app solo cuando hay cambios reales en la batería, evitando el desgaste de
+energía).
+● IA Generativa: Tu asistente gratuito para escribir, depurar y adaptar el código según las
+instrucciones de este manual.
+1.2. Tu Kit de Herramientas 100% Gratuito
+No necesitas comprar software ni licencias. Utilizarás:
+1. Android Studio (Gratuito): El entorno oficial de desarrollo para ensamblar y compilar tu
+aplicación.
+2. Asistente de IA (ChatGPT, Gemini, Claude, etc.): Para generar los archivos de código
+copiando los prompts (instrucciones) de este manual.
+3. Plataformas de Inspiración Visual:
+○ Pinterest y Dribbble: Busca "Battery App UI" o "Energy Dashboard" para elegir tu combinación de colores y distribución.
+○ Spline Community: Para explorar ideas de elementos 3D y colores neón.
+MÓDULO 2: Repositorios y Fuentes de Código Base
+Para no empezar desde una página en blanco, utilizaremos soluciones y cálculos de ingeniería
+que ya han sido probados por otros desarrolladores. Puedes revisar o indicarle a la IA que tome
+referencia de estos repositorios abiertos:
+● Proyectos de Monitoreo en Kotlin (GitHub): Colección de proyectos de código abierto
+para ver ejemplos reales de monitoreo.
+● Charging App en Kotlin/Compose (GitHub): Ejemplo completo de diseño con Jetpack
+Compose para estructurar pantallas.
+● Battery View Android Component (GitHub): Código útil para entender la lógica
+matemática detrás del llenado de barras y cambios de color dinámicos.
+● Documentación Oficial de BatteryManager (Android Developers): La guía técnica
+oficial de Google sobre las claves de hardware.
+MÓDULO 3: Guía de Fórmulas y Lectura de Hardware
+Para que tu aplicación muestre datos reales de la batería, la IA deberá escribir código que lea e
+interprete las siguientes variables físicas del teléfono:
+1. Voltaje (V): La batería entrega milivoltios (\text{mV}). La fórmula de conversión es: V =
+\frac{\text{mV}}{1000}
+2. Temperatura (^\circ\text{C}): Se recibe en décimas de grado Celsius. La fórmula es:
+^\circ\text{C} = \frac{\text{dato}}{10}
+3. Nivel de Carga (\%): Se calcula dividiendo el nivel actual entre la escala máxima: \% =
+\left(\frac{\text{nivel}}{\text{escala}}\right) \times 100
+4. Amperaje (\text{mA}): Se lee de la propiedad
+BATTERY_PROPERTY_CURRENT_NOW en microamperios (\mu\text{A}) y se convierte
+a miliamperios (\text{mA}): \text{mA} = \frac{\mu\text{A}}{1000}
+5. Potencia en Vatios (W): Se calcula multiplicando el voltaje real por el amperaje real: W =
+V \times A
+MÓDULO 4: Paso a Paso del Proyecto y Prompts para
+la IA
+A continuación se detallan las fases de trabajo. Copia el Prompt para la IA de cada lección,
+pégalo en tu chatbot de IA favorito y copia el código resultante dentro de tu proyecto en Android
+Studio.
+LECCIÓN 1: La Estructura del Proyecto
+Crea un proyecto nuevo en Android Studio seleccionando la plantilla "Empty Compose
+Activity" y nombra tu paquete como com.tuusuario.cyberbattery.
+Estructura de carpetas a crear:
+com.tuusuario.cyberbattery ├── MainActivity.kt
+├── data/
+│ ├── model/BatteryState.kt
+│ └── receiver/BatteryReceiver.kt
+├── viewmodel/BatteryViewModel.kt
+└── ui/
+├── theme/Color.kt
+├── components/AnimatedMeterBar.kt
+└── screens/DashboardScreen.kt
+LECCIÓN 2: Extracción de Datos de Hardware (Backend)
+Qué hace esta lección:
+Configura el receptor que escucha los eventos del teléfono para obtener el voltaje, la
+temperatura, la corriente y el porcentaje de batería sin gastar energía en segundo plano.
+Prompt para copiar y enviar a la IA:
+"Actúa como un desarrollador experto en Android y Kotlin. Necesito que me generes el código
+para dos archivos de mi aplicación de batería:
+1. BatteryState.kt (Data class inmutable que guarde: voltage: Float, current: Int,
+temperature: Float, level: Int, watts: Float, isCharging: Boolean).
+2. BatteryReceiver.kt (Un BroadcastReceiver que escuche
+Intent.ACTION_BATTERY_CHANGED, extraiga los valores de hardware de
+BatteryManager aplicando las conversiones matemáticas de mV a Voltios, décimas a °C,
+microamperios a mA y calcule los Vatios. Debe actualizar los datos de forma eficiente).
+Proporciona el código limpio, bien comentado en español y optimizado para Jetpack
+Compose."
+Verificación de la Lección:
+● Comprueba que los archivos creados no marquen errores de sintaxis en Android Studio.
+● Revisa en la consola (Logcat) que los datos cambien cuando conectas o desconectas el
+cargador.
+LECCIÓN 3: Gestión de Estado Reactivo (ViewModel)
+Qué hace esta lección:
+Conecta la lectura del hardware con la pantalla. Asegura que los datos se actualicen al instante
+y que no se pierdan al girar la pantalla del móvil.
+Prompt para copiar y enviar a la IA:
+"Genera el código para BatteryViewModel.kt en Kotlin utilizando Jetpack Compose y StateFlow.
+El ViewModel debe instanciar y gestionar el BatteryReceiver, exponiendo un StateFlow<BatteryState> inmutable hacia la interfaz de usuario. Asegúrate de registrar y
+desregistrar el receiver respetando el ciclo de vida para evitar fugas de memoria."
+Verificación de la Lección:
+● Conecta el móvil a la herramienta de depuración y verifica que el flujo de datos emita un
+objeto actualizado cada vez que el sistema notifique un cambio de energía.
+LECCIÓN 4: Diseño de las Barras Neón Dinámicas (Canvas)
+Qué hace esta lección:
+Crea un componente gráfico reutilizable que dibuja barras de colores tipo neón en 2D. La barra
+sube y baja de forma fluida cuando cambia el nivel de la batería o el voltaje.
+Prompt para copiar y enviar a la IA:
+"Crea un componente @Composable en Kotlin llamado AnimatedMeterBar.kt usando Jetpack
+Compose Canvas para un diseño estilo cyberpunk/futurista. Requisitos:
+1. Debe recibir: value: Float, maxValue: Float, label: String, unit: String y un color base.
+2. Debe usar animateFloatAsState para que el llenado de la barra se mueva de forma fluida
+y no con saltos bruscos.
+3. Usa drawRoundRect en el Canvas para dibujar un fondo oscuro con borde metálico y una
+barra de llenado dinámico neón.
+4. Si el valor está en estado crítico (ej. batería < 15% o temperatura > 40°C), el color debe
+cambiar automáticamente a un rojo neón brillante (#FF0055)."
+Verificación de la Lección:
+● Activa la vista previa (Preview) en Android Studio.
+● Cambia manualmente el valor del parámetro en el código de pruebas y comprueba que la
+barra se mueva suavemente.
+LECCIÓN 5: Ensamblado de la Pantalla Principal (DashboardScreen)
+Qué hace esta lección:
+Junta todas las piezas. Crea la pantalla principal donde se organizan las diferentes barras
+verticales u horizontales (Voltaje, Amperaje, Vatios, Temperatura y Porcentaje).
+Prompt para copiar y enviar a la IA:
+"Genera el código para DashboardScreen.kt en Jetpack Compose. Debe conectarse al
+BatteryViewModel mediante collectAsStateWithLifecycle() y organizar verticalmente en una
+columna estilo Cyberpunk las siguientes barras de medición usando nuestro componente
+AnimatedMeterBar:
+1. Nivel de Batería (%).
+2. Voltaje (V). 3. Amperaje (mA).
+4. Potencia (W).
+5. Temperatura (°C). Añade títulos con tipografía clara y asegúrate de que toda la pantalla
+tenga un fondo oscuro con estética de panel de control."
+Verificación de la Lección:
+● Compila la aplicación en tu móvil físico usando el botón Run de Android Studio.
+● Desconecta y conecta el cargador: verás cómo todas las barras reaccionan al mismo
+tiempo mostrando la información del teléfono.
+MÓDULO 5: Checkpoint de Calidad y Pruebas de
+Funcionamiento
+Antes de dar por terminada la aplicación o compartirla, realiza esta verificación técnica de
+calidad:
+Checkpoint Qué debemos verificar Criterio de Aprobación
+1. Lectura de Hardware Conectar el cargador al
+teléfono físico.
+Las lecturas de mA pasan a
+valor positivo/carga y los Vatios
+cambian al instante.
+2. Fluidez Gráfica Observar el movimiento de las
+barras.
+Las barras no saltan
+bruscamente; se deslizan
+mediante animación fluida.
+3. Consumo de Batería Revisar la app en el perfilador
+de Android Studio.
+En reposo (pantalla encendida
+sin tocar nada), el consumo de
+CPU debe ser menor al 2%.
+4. Adaptabilidad Girar el teléfono de vertical a
+horizontal.
+Los elementos se reordenan o
+permiten desplazamiento sin
+recortar texto.
+5. Permisos Limpios Instalar la APK generada. La aplicación abre
+inmediatamente sin solicitar
+permisos invasivos de
+ubicación o cámara.
+Conclusión
+Siguiendo esta guía, cualquier usuario puede combinar la potencia de las herramientas nativas
+de Android, las matemáticas básicas de hardware y la asistencia de la Inteligencia Artificial 
