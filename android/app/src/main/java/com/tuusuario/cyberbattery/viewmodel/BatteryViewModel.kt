@@ -36,8 +36,8 @@ class BatteryViewModel(application: Application) : AndroidViewModel(application)
     }
 
     /**
-     * La corriente instantánea NO llega en el broadcast.
-     * Hay que preguntar a BatteryManager varias veces por segundo.
+     * La corriente no llega en el broadcast: se consulta al hardware
+     * cada 1,5 s (ni saturado ni lento).
      */
     private fun startPolling() {
         if (pollJob != null) return
@@ -45,7 +45,7 @@ class BatteryViewModel(application: Application) : AndroidViewModel(application)
         pollJob = viewModelScope.launch {
             while (isActive) {
                 publish(BatteryReader.read(context))
-                delay(500L)
+                delay(1_500L)
             }
         }
     }

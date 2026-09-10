@@ -55,7 +55,7 @@ fun AnimatedMeterBar(
 
     val animatedProgress by animateFloatAsState(
         targetValue = targetProgress,
-        animationSpec = tween(durationMillis = 600),
+        animationSpec = tween(durationMillis = 900),
         label = "meterProgress"
     )
 
